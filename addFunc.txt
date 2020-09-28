@@ -1,0 +1,21 @@
+async function addRecordToMaster(tenant, module, master, record) {
+
+    let data = await readFileAsync(getMasterFilePath(tenant, module, master), 'utf8');
+
+    let currentData = JSON.parse(data);
+
+    currentData.tenants.push(record);
+
+    let newContent = JSON.stringify(currentData);
+
+    fs.writeFile(getMasterFilePath(tenant, module, master), newContent, 'utf8', function (err) {
+        if (err) {
+            return console.log(err);
+        }
+
+        console.log("The file was saved!");
+    });
+    let lol = await readFileAsync(getMasterFilePath(tenant, module, master), 'utf8');
+    return JSON.parse(JSON.stringify(lol))["tenants"];
+
+}

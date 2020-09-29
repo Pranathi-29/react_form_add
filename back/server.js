@@ -86,7 +86,7 @@ async function updateMasterData(tenant, module, master, updatedTenant) {
 
 }
 
-async function deleteRecord(tenant, module, master, record) {
+async function deleteRecord(tenant, module, master, records) {
 
     let data = await readFileAsync(getMasterFilePath(tenant, module, master), 'utf8');
 
@@ -94,17 +94,19 @@ async function deleteRecord(tenant, module, master, record) {
     console.log(currentData);
    
     var index = -1;
-
-    for (var i in currentData.tenants) {
-        if (currentData.tenants[i].code == record.code)
+   for(var i in records){
+    for (var j in currentData.tenants) {
+        if (currentData.tenants[j].code == records[i].code)
             {
                 index = i;
+                currentData.tenants.splice(j,1);
                 break;
             }
     }
+    
+   }
 
-
-   currentData.tenants.splice(i,1);
+   
 
     let newContent = JSON.stringify(currentData);
     
@@ -167,14 +169,14 @@ app.post("/masters/:tenant/:module/:master/update", async (req, res) => {
 
 app.post("/masters/:tenant/:module/:master/delete", async (req, res) => {
     let p = req.params;
-    var delTenant = req.body.body;
+    var delTenants = req.body.body;
 
-    if (isEmpty(delTenant)) {
+    if (isEmpty(delTenants)) {
         console.log('Empty Object');
     }
-    console.log(delTenant);
+    console.log(delTenants);
 
-    let d = await deleteRecord(p.tenant, p.module, p.master, delTenant);
+    let d = await deleteRecord(p.tenant, p.module, p.master, delTenants);
     console.log(d);
     res.send(d);
 

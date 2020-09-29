@@ -15,6 +15,7 @@ export default class Example extends Admin {
 
     this.pages_in_pagination = 20;
     this.list_per_page = 10;
+    
   }
 
 
@@ -67,7 +68,7 @@ export default class Example extends Admin {
 
       console.log(typeof (response.data));
       console.log(response.data);
-
+      
     });
 
     this.setState({
@@ -118,7 +119,11 @@ export default class Example extends Admin {
           })
 
         }
-        this.set_queryset(this.get_queryset());
+        //this.set_queryset(this.get_queryset());
+        this.setState({
+          
+          queryset: this.get_queryset(this.state.page_number, this.list_per_page, this.state.queryset)
+        });
         
       }
     }

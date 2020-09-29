@@ -4,15 +4,29 @@ const port = 5000;
 const fs = require('fs');
 const util = require("util");
 const isEmpty = require('lodash.isempty');
+const bodyParser = require('body-parser');
+
+
+//flash
+const session = require('express-session'); 
+const flash = require('connect-flash');
 
 const readFileAsync = util.promisify(fs.readFile);
-const bodyParser = require('body-parser');
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 var t;
 
+
+app.use(session({
+	secret:'happy dog',
+	saveUninitialized: true,
+	resave: true
+}));
+
+app.use(flash());
 
 const BASE_DATA_PATH = "D:\\ps\\React forms\\up\\punjab-mdms-data\\data\\pb"
 const path = require("path");
@@ -130,8 +144,10 @@ app.post("/masters/:tenant/:module/:master/add", async (req, res) => {
     console.log(newTenant);
     let a = await updateMasterData(p.tenant, p.module, p.master, newTenant);
     console.log(a);
+    
+    //res.send(req.flash('success', 'Form submitted successfully'));
+    
     res.send(a);
-
 })
 
 app.post("/masters/:tenant/:module/:master/update", async (req, res) => {

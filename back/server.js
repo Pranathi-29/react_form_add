@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 
 
 //flash
-const session = require('express-session'); 
+const session = require('express-session');
 const flash = require('connect-flash');
 
 const readFileAsync = util.promisify(fs.readFile);
@@ -21,9 +21,9 @@ var t;
 
 
 app.use(session({
-	secret:'happy dog',
-	saveUninitialized: true,
-	resave: true
+    secret: 'happy dog',
+    saveUninitialized: true,
+    resave: true
 }));
 
 app.use(flash());
@@ -54,15 +54,14 @@ async function updateMasterData(tenant, module, master, updatedTenant) {
 
     let currentData = JSON.parse(data);
     console.log(currentData);
-   
+
     var index = -1;
 
     for (var i in currentData.tenants) {
-        if (currentData.tenants[i].code == updatedTenant.code)
-            {
-                index = i;
-                break;
-            }
+        if (currentData.tenants[i].code == updatedTenant.code) {
+            index = i;
+            break;
+        }
     }
 
 
@@ -73,7 +72,7 @@ async function updateMasterData(tenant, module, master, updatedTenant) {
     }
 
     let newContent = JSON.stringify(currentData);
-    
+
     fs.writeFile(getMasterFilePath(tenant, module, master), newContent, 'utf8', function (err) {
         if (err) {
             return console.log(err);
@@ -92,24 +91,23 @@ async function deleteRecord(tenant, module, master, records) {
 
     let currentData = JSON.parse(data);
     console.log(currentData);
-   
+
     var index = -1;
-   for(var i in records){
-    for (var j in currentData.tenants) {
-        if (currentData.tenants[j].code == records[i].code)
-            {
+    for (var i in records) {
+        for (var j in currentData.tenants) {
+            if (currentData.tenants[j].code == records[i].code) {
                 index = i;
-                currentData.tenants.splice(j,1);
+                currentData.tenants.splice(j, 1);
                 break;
             }
-    }
-    
-   }
+        }
 
-   
+    }
+
+
 
     let newContent = JSON.stringify(currentData);
-    
+
     fs.writeFile(getMasterFilePath(tenant, module, master), newContent, 'utf8', function (err) {
         if (err) {
             return console.log(err);
@@ -146,9 +144,9 @@ app.post("/masters/:tenant/:module/:master/add", async (req, res) => {
     console.log(newTenant);
     let a = await updateMasterData(p.tenant, p.module, p.master, newTenant);
     console.log(a);
-    
+
     //res.send(req.flash('success', 'Form submitted successfully'));
-    
+
     res.send(a);
 })
 

@@ -3,13 +3,14 @@ import Admin from "react-crud-admin";
 import Form from "react-jsonschema-form";
 import axios from "axios";
 
-import "react-crud-admin/css"; //optional css import
 
+import "react-crud-admin/css"; //optional css import
+const _ = require("lodash");
 function paginate(array, page_size, page_number) {
   // human-readable page numbers usually start with 1, so we reduce 1 in the first argument
   return array.slice((page_number - 1) * page_size, page_number * page_size);
-  }
-  
+}
+
 
 export default class Example extends Admin {
   constructor() {
@@ -18,7 +19,7 @@ export default class Example extends Admin {
     this.name_plural = "Tenants";
     this.list_display_links = ["name"];
     this.list_display = ["name", "code", "emailId", "city.districtName"];
-    this.pages_in_pagination = 20;
+   
     this.list_per_page = 10;
     
   }
@@ -29,9 +30,10 @@ export default class Example extends Admin {
 
     axios.get("/masters/pb/tenant/tenants").then(response => {
 
-      let data = paginate (response.data, list_per_page, page_number)
+      let data = paginate(response.data, list_per_page, page_number)
       this.set_queryset(data);
       this.set_total(response.data.length);
+      this.pages_in_pagination = response.data.length / list_per_page;
       console.log("You is amazee!");
 
     });
@@ -73,7 +75,7 @@ export default class Example extends Admin {
 
       console.log(typeof (response.data));
       console.log(response.data);
-      
+
     });
 
     this.setState({
@@ -107,56 +109,89 @@ export default class Example extends Admin {
   get_actions() {
     return {
       "delete": (selected_objects) => {
-          console.log(selected_objects);
-        
-          axios.post("/masters/pb/tenant/tenants/delete", {
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: selected_objects
-          }).then(response => {
+        console.log(selected_objects);
 
-           
-            this.set_queryset(response.data);
-            console.log(typeof (response.data));
-            console.log(response.data);
-           
-          })
+        axios.post("/masters/pb/tenant/tenants/delete", {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: selected_objects
+        }).then(response => {
 
-        
+
+          this.set_queryset(response.data);
+          console.log(typeof (response.data));
+          console.log(response.data);
+
+        })
+
+
         //this.set_queryset(this.get_queryset());
         this.setState({
-          
+
           queryset: this.get_queryset(this.state.page_number, this.list_per_page, this.state.queryset)
         });
-        
+
       }
     }
 
   }
-  render_list_view()
-{
-  return (
-    <div>
-      {this.render_add_button()}
-      {this.render_below_add_button()}
-      {this.render_search_field()}
-      {this.render_below_search_field()}
-      {this.render_actions()}
-      {this.render_below_actions()}
-      {this.render_filters()}
-      {this.render_below_filters()}
-      {this.render_table()}
-      {this.render_add_button()}
-      {this.render_below_table()}
-      {this.render_progress(this.state.loading)}
-      {this.render_below_progress()}
-      {this.render_pagination()}
-    </div>
-  );
-}
+  render_list_view() {
+    return (
+      <div>
+        {this.render_add_button()}
+        {this.render_below_add_button()}
+        {this.render_search_field()}
+        {this.render_below_search_field()}
+        {this.render_actions()}
+        {this.render_below_actions()}
+        {this.render_filters()}
+        {this.render_below_filters()}
+        {this.render_table()}
+        {this.render_add_button()}
+        {this.render_below_table()}
+        {this.render_progress(this.state.loading)}
+        {this.render_below_progress()}
+        {this.render_pagination()}
+      </div>
+    );
+  }
+  action_selected(event) {
+    let action = event.target.value;
+ 
+    console.log(this.state.selected_objects.getItems());
+    this.get_actions()[action](this.state.selected_objects.getItems());
+    this.get_queryset(this.state.page_number, this.get_list_per_page());
+  }
 
   
+  render_actions() {
+    
+    return (
+      <select
+        className="ra-action-button"
+        onChange={this.action_selected.bind(this)}
+        defaultValue={""}
+        value=""
+         
+      >
+        <option key="key" selected value="" disabled={true}>
+          Choose an action
+        </option>
+        {_.keys(this.get_actions()).map(action => {
+          return (
+            <option key={action} value={action}>
+              {" "}
+              {_.startCase(action)}
+            </option>
+            
+          );
+        })}
+      
+      </select>
+    );
+  }
+
   get_form(object = null) {
     let schema = {
       "$schema": "http://json-schema.org/schema#",
